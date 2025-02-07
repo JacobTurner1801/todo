@@ -1,6 +1,7 @@
 package com.todo;
 
 import java.sql.Statement;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,9 +13,9 @@ import java.util.List;
 public class TodoItemDAO {
     private Connection connection; // db connect
 
-    public TodoItemDAO() {
+    public TodoItemDAO(String dbPath) {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
             createTableIfNeeded();
         } catch (SQLException se) {
             System.err.println("ERROR: CREATING CONNECTION");
@@ -22,6 +23,14 @@ public class TodoItemDAO {
             System.err.println(se.getMessage());
             se.printStackTrace();
         }
+    }
+
+    public void deleteFile(String databaseName) throws Exception {
+       File db = new File(databaseName);
+       boolean del = db.delete();
+       if (!del) {
+        throw new Exception("Could not delete file: " + databaseName);
+       }
     }
 
     private void createTableIfNeeded() throws SQLException {
@@ -72,6 +81,18 @@ public class TodoItemDAO {
             se.printStackTrace();
         }
         return todoItems;
+    }
+
+    public void clearAndReCreateTable() {
+        try (Statement st = connection.createStatement()) {
+            st.execute("DROP TABLE todos");
+            createTableIfNeeded();
+        } catch (SQLException se) {
+            System.err.println("ERROR: CLEARING TABLE");
+            System.err.println(se.getSQLState() + " " + se.getErrorCode());
+            System.err.println(se.getMessage());
+            se.printStackTrace();
+        }
     }
 
     public void close() {
