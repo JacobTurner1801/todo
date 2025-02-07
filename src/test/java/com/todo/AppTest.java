@@ -7,12 +7,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+// @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AppTest {
     private static TodoItemDAO dao;
 
@@ -21,6 +20,11 @@ public class AppTest {
         UUID uid = UUID.randomUUID();
         String path = "sample_" + uid.toString() + ".db";
         dao = new TodoItemDAO(path);
+    }
+
+    @Before
+    public void initialise() {
+        dao.clearAndReCreateTable();
     }
 
     @AfterClass
@@ -43,18 +47,12 @@ public class AppTest {
         dao.addTodoItem("Pay Bills");
 
         List<TodoItem> items = dao.getAllTodoItems();
-        // System.out.println(items.size());
-        // for (TodoItem item : items) {
-        // System.out.println(item);
-        // }
-        // System.out.println(items.size());
         assertTrue(items.size() == 2);
 
     }
 
     @Test
     public void testClearDatabase() {
-
         dao.addTodoItem("Grocery Shopping");
         dao.addTodoItem("Pay Bills");
 
@@ -66,26 +64,20 @@ public class AppTest {
 
     @Test
     public void testDeletingItem() {
-
         dao.addTodoItem("Grocery Shopping");
         dao.addTodoItem("Pay Bills");
 
         dao.deleteTodoItem(1); // autoincrement starts at 1
 
         assertTrue(dao.getAllTodoItems().size() == 1);
-        // NOTE: since we have a static dao thing, I don't think each item 
-        // gets deleted when it should because we might have 
-        // two tasks running at the same time together
-        // so this is my current workaround, because this is ran before testGettingOneItem
-        dao.clearAndReCreateTable();
     }
 
     @Test
     public void testGettingOneItem() {
-        dao.addTodoItem("Test Task"); // Use the dao object
+        dao.addTodoItem("Test Task");
         Optional<TodoItem> ti = dao.getTodoItemById(1);
         ti.ifPresent(todoItem -> System.out.println("Found task: " + todoItem));
+        System.out.println(ti.get());
         assertTrue(ti.get().getTask().equals("Test Task"));
-        // fail();      
     }
 }
