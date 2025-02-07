@@ -9,60 +9,86 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TodoItemDAO {
     private Connection connection; // db connect
+    private String dbPath;
 
     public TodoItemDAO(String dbPath) {
+        this.dbPath = dbPath;
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
             createTableIfNeeded();
         } catch (SQLException se) {
-            System.err.println("ERROR: CREATING CONNECTION");
-            System.err.println(se.getSQLState() + " " + se.getErrorCode());
-            System.err.println(se.getMessage());
-            se.printStackTrace();
+            new TodoItemDAOSQLError("CREATING CONNECTION", se);
         }
     }
 
-    public boolean deleteFile(String databaseName) throws Exception {
-       File db = new File(databaseName);
-       boolean del = db.delete();
-       if (!del) {
-        throw new Exception("Could not delete file: " + databaseName);
-       }
-       return true;
-    }
+    public String getDbPath() {return this.dbPath;}
 
+    
+    public boolean deleteFile(String databaseName) throws Exception {
+        File db = new File(databaseName);
+        boolean del = db.delete();
+        if (!del) {
+            throw new Exception("Could not delete file: " + databaseName);
+        }
+        return true;
+    }
+    
     private void createTableIfNeeded() throws SQLException {
         // completed is 0 if false, 1 if true
         try {
             Statement st = connection.createStatement();
             st.execute("CREATE TABLE IF NOT EXISTS todos (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," + 
-                "task TEXT NOT NULL," +
-                "completed INTEGER NOT NULL DEFAULT 0)"
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," + 
+            "task TEXT NOT NULL," +
+            "completed INTEGER NOT NULL DEFAULT 0)"
             );
         } catch (SQLException se) {
-            System.err.println("ERROR: CREATING TABLE");
-            System.err.println(se.getSQLState() + " " + se.getErrorCode());
-            System.err.println(se.getMessage());
-            se.printStackTrace();
+            new TodoItemDAOSQLError("CREATING TABLE", se);
         }
     }
 
-    public void addTodoItem(String task) {
-        try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO todos (task, completed) VALUES (?, ?)");
-            ps.setString(1, task);
-            ps.setInt(2, 0);
+    public void deleteTodoItem(int id) {
+        try (Statement st = connection.createStatement()) {
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM todos WHERE id = (?)");
+            ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException se) {
-            System.err.println("ERROR: ADDING TODO ITEM");
-            System.err.println(se.getSQLState() + " " + se.getErrorCode());
-            System.err.println(se.getMessage());
-            se.printStackTrace();
+            new TodoItemDAOSQLError("DELETING TASK", se);
         }
+    }
+    
+    public void addTodoItem(String task) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO todos (task) VALUES (?)");
+            ps.setString(1, task);
+            ps.executeUpdate();
+        } catch (SQLException se) {
+            new TodoItemDAOSQLError("ADDING ITEM", se);
+        }
+    }
+
+    public Optional<TodoItem> getTodoItemById(int id) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT id, task, completed FROM todos WHERE id = ?")) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    System.out.println("here");
+                    int itemId = resultSet.getInt("id");
+                    String task = resultSet.getString("task");
+                    boolean completed = resultSet.getInt("completed") == 1;
+                    return Optional.of(new TodoItem(itemId, task, completed));
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException se) {
+            new TodoItemDAOSQLError("GETTING ITEM", se);
+        }
+        return Optional.empty();
     }
 
     public List<TodoItem> getAllTodoItems() {
@@ -76,10 +102,7 @@ public class TodoItemDAO {
                 todoItems.add(new TodoItem(id, task, completed));
             }
         } catch (SQLException se) {
-            System.err.println("ERROR: GETTING ALL TODO ITEMS");
-            System.err.println(se.getSQLState() + " " + se.getErrorCode());
-            System.err.println(se.getMessage());
-            se.printStackTrace();
+            new TodoItemDAOSQLError("GETTING ALL TODO ITEMS", se);
         }
         return todoItems;
     }
@@ -89,10 +112,7 @@ public class TodoItemDAO {
             st.execute("DROP TABLE todos");
             createTableIfNeeded();
         } catch (SQLException se) {
-            System.err.println("ERROR: CLEARING TABLE");
-            System.err.println(se.getSQLState() + " " + se.getErrorCode());
-            System.err.println(se.getMessage());
-            se.printStackTrace();
+            new TodoItemDAOSQLError("CLEARING TABLE", se);
         }
     }
 
@@ -102,10 +122,7 @@ public class TodoItemDAO {
                 connection.close();
             }
         } catch (SQLException se) {
-            System.err.println("ERROR: CLOSING CONNECTION!!");
-            System.err.println(se.getSQLState() + " " + se.getErrorCode());
-            System.err.println(se.getMessage());
-            se.printStackTrace();
+            new TodoItemDAOSQLError("CLOSING CONNECTION!!!!", se);
         }
     }
 
