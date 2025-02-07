@@ -4,5 +4,6 @@ package com.todo;
 
 public class App {
     public static void main( String[] args ) {
+        // to run: mvn clean install ; mvn exec:java
     }
 }
