@@ -33,7 +33,7 @@ public class AppTest
         }
         dao.close();
         try {
-            dao.deleteFile("sample.db");
+            assertTrue(dao.deleteFile("sample.db"));
         } catch (Exception e) {
             e.printStackTrace();
         }

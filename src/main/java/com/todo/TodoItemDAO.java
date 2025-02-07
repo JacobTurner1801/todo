@@ -25,12 +25,13 @@ public class TodoItemDAO {
         }
     }
 
-    public void deleteFile(String databaseName) throws Exception {
+    public boolean deleteFile(String databaseName) throws Exception {
        File db = new File(databaseName);
        boolean del = db.delete();
        if (!del) {
         throw new Exception("Could not delete file: " + databaseName);
        }
+       return true;
     }
 
     private void createTableIfNeeded() throws SQLException {
