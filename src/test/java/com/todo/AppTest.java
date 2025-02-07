@@ -40,4 +40,18 @@ public class AppTest
         // System.out.println(items.size());
         assertTrue(items.size() == 2);
     }
+
+    @Test
+    public void testClearDatabase() {
+        TodoItemDAO dao = new TodoItemDAO("sample.db");
+
+        dao.addTodoItem("Grocery Shopping");
+        dao.addTodoItem("Pay Bills");
+
+        dao.clearAndReCreateTable();
+
+        assertTrue(dao.getAllTodoItems().size() == 0);
+
+        dao.close();
+    }
 }
