@@ -80,4 +80,27 @@ public class AppTest {
         System.out.println(ti.get());
         assertTrue(ti.get().getTask().equals("Test Task"));
     }
+
+    @Test
+    public void testGettingAllCompleted() {
+        dao.addTodoItem("Test Completed");
+        dao.addTodoItem("Not completed task");
+        // update the database
+        dao.updateItemCompleted(1, true);
+        // get all completed
+        List<TodoItem> items = dao.getAllCompletedItems(true);
+        assertTrue(items.size() == 1);
+    }
+
+    @Test
+    public void testGettingAllNotCompleted() {
+        dao.addTodoItem("Test Completed");
+        dao.addTodoItem("Not completed task");
+        dao.addTodoItem("Another not completed task");
+
+        dao.updateItemCompleted(1, true);
+        
+        List<TodoItem> items = dao.getAllCompletedItems(false);
+        assertTrue(items.size() == 2);
+    }
 }

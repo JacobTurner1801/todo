@@ -94,7 +94,7 @@ public class TodoItemDAO {
     public List<TodoItem> getAllTodoItems() {
         List<TodoItem> todoItems = new ArrayList<>();
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT id, task, completed FROM todos")) {
+            ResultSet resultSet = statement.executeQuery("SELECT id, task, completed FROM todos")) {
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String task = resultSet.getString("task");
@@ -105,6 +105,37 @@ public class TodoItemDAO {
             new TodoItemDAOSQLError("GETTING ALL TODO ITEMS", se);
         }
         return todoItems;
+    }
+
+    public List<TodoItem> getAllCompletedItems(boolean completed) {
+
+        List<TodoItem> todoItems = new ArrayList<>();
+        String query = "SELECT id, task, completed FROM todos WHERE completed = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, completed ? 1 : 0);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String task = rs.getString("task");
+                boolean rs_completed = rs.getInt("completed") == 1;
+                todoItems.add(new TodoItem(id, task, rs_completed));
+            }
+        } catch (SQLException se) {
+            new TodoItemDAOSQLError("GETTING ALL COMPLETED ITEMS", se);
+        }
+        return todoItems;
+    }
+
+    public void updateItemCompleted(int id, boolean completed) {
+        String query = "UPDATE todos SET completed = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, completed ? 1 : 0);
+            ps.setInt(2, id);
+            int affect = ps.executeUpdate();
+            System.out.println("Rows affected: " + affect);
+        } catch (SQLException se) {
+            new TodoItemDAOSQLError("UPDATING COMPLETED " + String.valueOf(id) + " ", se);
+        }
     }
 
     public void clearAndReCreateTable() {
