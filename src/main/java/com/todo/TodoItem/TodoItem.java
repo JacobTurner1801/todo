@@ -1,4 +1,4 @@
-package com.todo;
+package com.todo.TodoItem;
 
 public class TodoItem {
     private int id;

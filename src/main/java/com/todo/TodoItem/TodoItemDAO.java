@@ -1,4 +1,4 @@
-package com.todo;
+package com.todo.TodoItem;
 
 import java.sql.Statement;
 import java.io.File;
