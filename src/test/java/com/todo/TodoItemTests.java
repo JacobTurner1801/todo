@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.junit.AfterClass;
 import org.junit.Before;
