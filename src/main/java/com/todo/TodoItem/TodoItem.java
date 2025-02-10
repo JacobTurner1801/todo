@@ -22,6 +22,9 @@ public class TodoItem {
 
     public int getId() {return this.id.get();}
     public String getTask() {return this.task.get();}
+    public StringProperty getTaskProperty() {return this.task;}
+    public IntegerProperty getIdProperty() {return this.id;}
+    public BooleanProperty getCompletedProperty() {return this.completed;}
     public boolean isCompleted() {return this.completed.get();}
     public void SetTask(String t) {this.task.set(t);}
     public void complete(boolean c) {this.completed.set(c);}
