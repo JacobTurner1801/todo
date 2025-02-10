@@ -1,0 +1,16 @@
+.root {
+    -fx-background-color: #312e2d /* Light gray background */
+}
+
+.list-view { /* Example: Style the list view */
+    -fx-text-fill: white;
+}
+
+.list-cell { /* Style the list cells */
+    -fx-background-color: #312e2d;
+}
+
+.label {
+    -fx-padding: 15px;
+    -fx-margin: auto;
+}
