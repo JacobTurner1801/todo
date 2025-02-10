@@ -10,7 +10,8 @@
     -fx-background-color: #312e2d;
 }
 
-.label {
+.hbox {
     -fx-padding: 15px;
     -fx-margin: auto;
+    -fx-background-color: #312e2d;
 }

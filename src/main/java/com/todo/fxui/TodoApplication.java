@@ -51,6 +51,30 @@ public class TodoApplication extends Application {
                 }
             }
         };
+        fetchTodoDataTask.setOnSucceeded(event -> {
+            List<TodoItem> tasks = fetchTodoDataTask.getValue();
+            if (tasks != null) {
+                // Initialise List View UI
+                Platform.runLater(() -> {
+                    todoItems.addAll(tasks);
+                    System.out.println();
+                    // todoList.setStyle("-fx-background-color: #312e2d; -fx-alignment: center");
+                });
+            } else {
+                System.out.println("tasks are null");
+                Alert a = new Alert(AlertType.ERROR);
+                a.setContentText("tasks are null");
+                a.show();
+            }
+        });
+        
+        fetchTodoDataTask.setOnFailed(event -> {
+            Throwable e = fetchTodoDataTask.getException();
+            System.err.println(e.getMessage() + "\n" + e.getLocalizedMessage());
+            e.printStackTrace();
+        });
+        
+        new Thread(fetchTodoDataTask).start();
         
         ListView<TodoItem> todoList = new ListView<TodoItem>(todoItems);
         todoList.setCellFactory(p -> new ListCell<TodoItem>() {
@@ -76,30 +100,6 @@ public class TodoApplication extends Application {
             }
         });
         
-        fetchTodoDataTask.setOnSucceeded(event -> {
-            List<TodoItem> tasks = fetchTodoDataTask.getValue();
-            if (tasks != null) {
-                // Initialise List View UI
-                Platform.runLater(() -> {
-                    todoItems.addAll(tasks);
-                    System.out.println();
-                    // todoList.setStyle("-fx-background-color: #312e2d; -fx-alignment: center");
-                });
-            } else {
-                System.out.println("tasks are null");
-                Alert a = new Alert(AlertType.ERROR);
-                a.setContentText("tasks are null");
-                a.show();
-            }
-        });
-        
-        fetchTodoDataTask.setOnFailed(event -> {
-            Throwable e = fetchTodoDataTask.getException();
-            System.err.println(e.getMessage() + "\n" + e.getLocalizedMessage());
-            e.printStackTrace();
-        });
-        
-        new Thread(fetchTodoDataTask).start();
         
         // VBox
         VBox.setVgrow(todoList, Priority.ALWAYS);

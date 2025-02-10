@@ -20,8 +20,7 @@ public class TodoItemTests {
 
     @BeforeClass
     public static void setUp() {
-        UUID uid = UUID.randomUUID();
-        String path = "sample_" + uid.toString() + ".db";
+        String path = "sample_.db";
         dao = new TodoItemDAO(path);
     }
 
