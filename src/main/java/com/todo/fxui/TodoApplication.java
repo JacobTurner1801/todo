@@ -28,73 +28,18 @@ public class TodoApplication extends Application {
 
     private TodoItemDAO dao;
 
+    private TodoItemService todoItemService;
+
     private ListView<TodoItem> todoList;
 
     private ObservableList<TodoItem> todoItems = FXCollections.observableArrayList(); // can notify of updates to content
-
-    private void loadData(boolean showComplete) {
-        Task<List<TodoItem>> task;
-        if (showComplete) { // show all
-            task = new Task<List<TodoItem>>() {
-                
-                @Override
-                protected List<TodoItem> call() throws Exception {
-                    try (TodoItemDAO dao = new TodoItemDAO("todos.db")) {
-                        List<TodoItem> items = dao.getAllTodoItems();
-                        // System.out.println(items);
-                        return items;
-                    }
-                }
-                
-            };
-        } else { // show only not completed
-            task = new Task<List<TodoItem>>() {
-                @Override
-                protected List<TodoItem> call() throws Exception {
-                    try (TodoItemDAO dao = new TodoItemDAO("todos.db")) {
-                        List<TodoItem> items = dao.getAllCompletedItems(false);
-                        // System.out.println(items);
-                        return items;
-                    }
-                }
-                
-            };
-        }
-        
-        task.setOnSucceeded(event -> {
-            List<TodoItem> tasks = task.getValue();
-            if (tasks != null) {
-                // Initialise List View UI
-                Platform.runLater(() -> {
-                    // System.out.println(tasks);
-                    todoItems.clear();
-                    todoItems.addAll(tasks);
-
-                    // System.out.println(todoItems.size() + " " + todoItems);
-                });
-            } else {
-                System.out.println("tasks are null");
-                Alert a = new Alert(AlertType.ERROR);
-                a.setContentText("tasks are null");
-                a.show();
-            }
-        });
-        
-        task.setOnFailed(event -> {
-            Throwable e = task.getException();
-            System.err.println(e.getMessage() + "\n" + e.getLocalizedMessage());
-            e.printStackTrace();
-        });
-        
-        new Thread(task).start();
-
-        
-    }
 
     @Override
     public void start(Stage primaryStage) {
         
         dao = new TodoItemDAO("todos.db");
+
+        todoItemService = new TodoItemService(dao);
 
         todoList = new ListView<>();
         
@@ -153,7 +98,7 @@ public class TodoApplication extends Application {
                             }
                         }; 
                         new Thread(updateTask).start();
-                        loadData(newVal);
+                        todoItemService.restart();
                         this.getListView().refresh(); // force a refresh of the list view
                     });
                     
@@ -179,9 +124,19 @@ public class TodoApplication extends Application {
         // filtering the items shown according to the checkbox
         CheckBox showCompleteBox = new CheckBox("Show Complete");
         showCompleteBox.setSelected(true);
-        loadData(showCompleteBox.isSelected());       
+        todoItemService.setShowComplete(showCompleteBox.isSelected());
+        todoItemService.restart();
+        
+        todoItemService.setOnSucceeded(event -> {
+            List<TodoItem> tasks = todoItemService.getValue();
+            todoItems.clear();
+            todoItems.addAll(tasks);
+            todoList.setItems(todoItems);
+        });
+        
         showCompleteBox.selectedProperty().addListener((obs, old, newVal) -> {
-            loadData(newVal);
+            todoItemService.setShowComplete(newVal);
+            todoItemService.restart();
         });
 
         Label showCompleteLabel = new Label("Show Completed Items");
