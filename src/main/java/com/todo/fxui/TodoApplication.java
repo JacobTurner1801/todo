@@ -28,11 +28,68 @@ public class TodoApplication extends Application {
 
     private TodoItemDAO dao;
 
-    private Task<List<TodoItem>> fetchTodoDataTask;
-
     private ListView<TodoItem> todoList;
 
     private ObservableList<TodoItem> todoItems = FXCollections.observableArrayList(); // can notify of updates to content
+
+    private void loadData(boolean showComplete) {
+        Task<List<TodoItem>> task;
+        if (showComplete) { // show all
+            task = new Task<List<TodoItem>>() {
+
+                @Override
+                protected List<TodoItem> call() throws Exception {
+                    try (TodoItemDAO dao = new TodoItemDAO("todos.db")) {
+                        List<TodoItem> items = dao.getAllTodoItems();
+                        // System.out.println(items);
+                        return items;
+                    }
+                }
+                
+            };
+        } else { // show only not completed
+            task = new Task<List<TodoItem>>() {
+                @Override
+                protected List<TodoItem> call() throws Exception {
+                    try (TodoItemDAO dao = new TodoItemDAO("todos.db")) {
+                        List<TodoItem> items = dao.getAllCompletedItems(false);
+                        // System.out.println(items);
+                        return items;
+                    }
+                }
+                
+            };
+        }
+
+        task.setOnSucceeded(event -> {
+            List<TodoItem> tasks = task.getValue();
+            if (tasks != null) {
+                // Initialise List View UI
+                Platform.runLater(() -> {
+                    // System.out.println(tasks);
+                    todoItems.clear();
+                    todoItems.addAll(tasks);
+                    
+                    // System.out.println(todoItems.size() + " " + todoItems);
+                });
+            } else {
+                System.out.println("tasks are null");
+                Alert a = new Alert(AlertType.ERROR);
+                a.setContentText("tasks are null");
+                a.show();
+            }
+        });
+        
+        task.setOnFailed(event -> {
+            Throwable e = task.getException();
+            System.err.println(e.getMessage() + "\n" + e.getLocalizedMessage());
+            e.printStackTrace();
+        });
+        
+        new Thread(task).start();
+
+        
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -66,7 +123,7 @@ public class TodoApplication extends Application {
                     CheckBox checkbox = new CheckBox();
                     Label taskL = new Label();
                     taskL.setPrefWidth(200);
-                    taskL.setWrapText(true);
+                    taskL.setWrapText(false);
 
                     taskL.textProperty().bind(item.getTaskProperty());
                     // bind bidirectional should update the database as well
@@ -103,7 +160,7 @@ public class TodoApplication extends Application {
                     cellContent.setAlignment(Pos.CENTER);
                     cellContent.setSpacing(10);
                     cellContent.setPrefWidth(300);
-                    cellContent.setPadding(new Insets(15));
+                    cellContent.setPadding(new Insets(5));
                     HBox.setHgrow(taskL, Priority.ALWAYS);
                     HBox.setHgrow(cellContent, Priority.ALWAYS);
 
@@ -118,47 +175,26 @@ public class TodoApplication extends Application {
             }
         });
 
-        // fetch items from the database
-        fetchTodoDataTask = new Task<>() {
-            @Override
-            protected List<TodoItem> call() throws Exception {
-                try (TodoItemDAO dao = new TodoItemDAO("todos.db")) {
-                    List<TodoItem> items = dao.getAllTodoItems();
-                    System.out.println(items);
-                    return items;
-                }
-            }
-        };
-        fetchTodoDataTask.setOnSucceeded(event -> {
-            List<TodoItem> tasks = fetchTodoDataTask.getValue();
-            if (tasks != null) {
-                // Initialise List View UI
-                Platform.runLater(() -> {
-                    // System.out.println(tasks);
-                    todoItems.addAll(tasks);
-                    // System.out.println(todoItems.size() + " " + todoItems);
-                });
-            } else {
-                System.out.println("tasks are null");
-                Alert a = new Alert(AlertType.ERROR);
-                a.setContentText("tasks are null");
-                a.show();
-            }
+        // filtering the items shown according to the checkbox
+        CheckBox showCompleteBox = new CheckBox("Show Complete");
+        showCompleteBox.setSelected(true);
+        loadData(showCompleteBox.isSelected());       
+        showCompleteBox.selectedProperty().addListener((obs, old, newVal) -> {
+            loadData(newVal);
         });
-        
-        fetchTodoDataTask.setOnFailed(event -> {
-            Throwable e = fetchTodoDataTask.getException();
-            System.err.println(e.getMessage() + "\n" + e.getLocalizedMessage());
-            e.printStackTrace();
-        });
-        
-        new Thread(fetchTodoDataTask).start();
-        
-        // VBox
-        VBox vb = new VBox(todoList);
+
+        Label showCompleteLabel = new Label("Show Completed Items");
+        showCompleteLabel.setPrefWidth(100);
+        showCompleteLabel.setWrapText(true);
+
+        // FILTER UI
+        HBox filter = new HBox(showCompleteBox, showCompleteLabel);
+        filter.setPadding(new Insets(5));
+        HBox.setHgrow(showCompleteLabel, Priority.ALWAYS);
+        // Main UI
+        VBox vb = new VBox(filter, todoList);
         VBox.setVgrow(todoList, Priority.ALWAYS);
-        // StackPane root = new StackPane(vb);
-        // root.setAlignment(Pos.CENTER);
+        // Scene
         Scene scene = new Scene(vb, 1920, 1080);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
         primaryStage.setTitle("Todo");
