@@ -15,3 +15,8 @@
     -fx-background-color: #312e2d;
     -fx-text-fill: white;
 }
+
+.completed-task {
+    -fx-strikehthrough: true;
+    -fx-text-fill: lightblue;
+}

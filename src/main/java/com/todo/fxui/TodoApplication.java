@@ -14,6 +14,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -62,11 +63,32 @@ public class TodoApplication extends Application {
                         setGraphic(null);
                     }
                 } else if (!empty && item != null) {
+                    CheckBox checkbox = new CheckBox();
                     Label taskL = new Label();
                     taskL.setPrefWidth(200);
                     taskL.setWrapText(true);
+
                     taskL.textProperty().bind(item.getTaskProperty());
-                    HBox cellContent = new HBox(taskL);
+                    // bind bidirectional should update the database as well
+                    checkbox.selectedProperty().bindBidirectional(item.getCompletedProperty());
+                    
+                    taskL.getStyleClass().removeAll("completed-task");
+                    System.out.println(item.isCompleted());
+                    System.out.println(dao.getTodoItemById(item.getId()));
+                    if (item.isCompleted()) {
+                        taskL.getStyleClass().add("completed-task");
+                    }
+
+                    checkbox.selectedProperty().addListener((obs, old, newVal) -> {
+                        item.complete(newVal);
+                        // TODO: REFACTOR TO USE TASKS INSTEAD OF SPAWNING A NEW THREAD EACH TIME :)
+                        new Thread(() -> {
+                            dao.updateItemCompleted(item.getId(), newVal);
+                        }).start();
+                        this.getListView().refresh(); // force a refresh of the list view
+                    });
+                    
+                    HBox cellContent = new HBox(checkbox, taskL);
                     cellContent.setAlignment(Pos.CENTER);
                     cellContent.setSpacing(10);
                     cellContent.setPrefWidth(300);
