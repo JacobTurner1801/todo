@@ -36,7 +36,7 @@ public class TodoApplication extends Application {
         Task<List<TodoItem>> task;
         if (showComplete) { // show all
             task = new Task<List<TodoItem>>() {
-
+                
                 @Override
                 protected List<TodoItem> call() throws Exception {
                     try (TodoItemDAO dao = new TodoItemDAO("todos.db")) {
@@ -60,7 +60,7 @@ public class TodoApplication extends Application {
                 
             };
         }
-
+        
         task.setOnSucceeded(event -> {
             List<TodoItem> tasks = task.getValue();
             if (tasks != null) {
@@ -69,7 +69,7 @@ public class TodoApplication extends Application {
                     // System.out.println(tasks);
                     todoItems.clear();
                     todoItems.addAll(tasks);
-                    
+
                     // System.out.println(todoItems.size() + " " + todoItems);
                 });
             } else {
@@ -153,6 +153,7 @@ public class TodoApplication extends Application {
                             }
                         }; 
                         new Thread(updateTask).start();
+                        loadData(newVal);
                         this.getListView().refresh(); // force a refresh of the list view
                     });
                     
@@ -192,10 +193,10 @@ public class TodoApplication extends Application {
         filter.setPadding(new Insets(5));
         HBox.setHgrow(showCompleteLabel, Priority.ALWAYS);
         // Main UI
-        VBox vb = new VBox(filter, todoList);
+        VBox root = new VBox(filter, todoList);
         VBox.setVgrow(todoList, Priority.ALWAYS);
         // Scene
-        Scene scene = new Scene(vb, 1920, 1080);
+        Scene scene = new Scene(root, 1920, 1080);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
         primaryStage.setTitle("Todo");
         primaryStage.setScene(scene); // Set Scene to Stage
