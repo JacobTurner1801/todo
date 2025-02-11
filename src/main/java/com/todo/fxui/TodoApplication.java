@@ -81,10 +81,21 @@ public class TodoApplication extends Application {
 
                     checkbox.selectedProperty().addListener((obs, old, newVal) -> {
                         item.complete(newVal);
-                        // TODO: REFACTOR TO USE TASKS INSTEAD OF SPAWNING A NEW THREAD EACH TIME :)
-                        new Thread(() -> {
-                            dao.updateItemCompleted(item.getId(), newVal);
-                        }).start();
+                        Task<Void> updateTask = new Task<Void>() {
+                            @Override
+                            protected Void call() throws Exception {
+                                dao.updateItemCompleted(item.getId(), newVal);
+                                return null;
+                            }
+
+                            @Override
+                            protected void failed() {
+                                Throwable e = getException();
+                                System.out.println(e.getMessage());
+                                e.printStackTrace();
+                            }
+                        }; 
+                        new Thread(updateTask).start();
                         this.getListView().refresh(); // force a refresh of the list view
                     });
                     
@@ -113,7 +124,7 @@ public class TodoApplication extends Application {
             protected List<TodoItem> call() throws Exception {
                 try (TodoItemDAO dao = new TodoItemDAO("todos.db")) {
                     List<TodoItem> items = dao.getAllTodoItems();
-                    // System.out.println(items.size());
+                    System.out.println(items);
                     return items;
                 }
             }

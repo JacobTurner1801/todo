@@ -16,6 +16,28 @@
     -fx-text-fill: white;
 }
 
+.check-box {
+    -fx-padding: 5;
+    -fx-background-color: #312e2d;
+}
+
+.check-box .box {
+    -fx-background-color: #312e2d; /* Set the box color */
+    -fx-border-color: green; /* Set the border color */
+    -fx-border-width: 2; /* Set the border width */
+    -fx-border-radius: 3; /* Set the border radius (rounded corners) */
+}
+
+.check-box .mark {
+    -fx-stroke: white; /* Set the tick color */
+    -fx-stroke-width: 3; /* Set the tick width */
+}
+
+.check-box:hover {
+    -fx-cursor: hand; /* Change cursor on hover */
+}
+
+
 .completed-task {
     -fx-strikehthrough: true;
     -fx-text-fill: lightblue;
