@@ -46,80 +46,9 @@ public class TodoApplication extends Application {
         // dao.addTodoItem("Finish Interface");
         // dao.addTodoItem("Complete Other things");
         todoList.setItems(todoItems);
+        todoList.setCellFactory(p -> new TodoItemCellFactory(dao, todoItemService, todoItems));
         // System.out.println(todoItems);
-        todoList.setCellFactory(p -> new ListCell<TodoItem>() {
-            @Override
-            protected void updateItem(TodoItem item, boolean empty) {
-                super.updateItem(item, empty);
-                // System.out.println("empty: " + empty);
-                // System.out.println("item: " + item);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-
-                    if (!todoItems.isEmpty() && item == null) { // Data is loaded, but item is null (Virtualization)
-                        // TODO: add in a loading thing here
-                        System.out.println("Loading...");
-                    } else {
-                        System.out.println("There may be a problem as both empty is true and item is null");
-                    }
-                } else if (!empty && item != null) {
-                    CheckBox checkbox = new CheckBox();
-                    Label taskL = new Label();
-                    taskL.setPrefWidth(200);
-                    taskL.setWrapText(false);
-
-                    taskL.textProperty().bind(item.getTaskProperty());
-                    // bind bidirectional should update the database as well
-                    checkbox.selectedProperty().bindBidirectional(item.getCompletedProperty());
-                    
-                    taskL.getStyleClass().removeAll("completed-task");
-                    System.out.println(item.isCompleted());
-                    System.out.println(dao.getTodoItemById(item.getId()));
-                    if (item.isCompleted()) {
-                        taskL.getStyleClass().add("completed-task");
-                    }
-
-                    checkbox.selectedProperty().addListener((obs, old, newVal) -> {
-                        item.complete(newVal);
-                        Task<Void> updateTask = new Task<Void>() {
-                            @Override
-                            protected Void call() throws Exception {
-                                dao.updateItemCompleted(item.getId(), newVal);
-                                return null;
-                            }
-
-                            @Override
-                            protected void failed() {
-                                Throwable e = getException();
-                                System.out.println(e.getMessage());
-                                e.printStackTrace();
-                            }
-                        }; 
-                        new Thread(updateTask).start();
-                        todoItemService.restart();
-                        this.getListView().refresh(); // force a refresh of the list view
-                    });
-                    
-                    HBox cellContent = new HBox(checkbox, taskL);
-                    cellContent.setAlignment(Pos.CENTER);
-                    cellContent.setSpacing(10);
-                    cellContent.setPrefWidth(300);
-                    cellContent.setPadding(new Insets(5));
-                    HBox.setHgrow(taskL, Priority.ALWAYS);
-                    HBox.setHgrow(cellContent, Priority.ALWAYS);
-
-                    // System.out.println("Item Task: " + item.getTask());
-                    // System.out.println("Label Text: " + taskL.getText());
-                    // System.out.println("Label Width: " + taskL.getWidth());
-                    // System.out.println("HBox Width: " + cellContent.getWidth());
-
-                    setGraphic(cellContent);
-                    setText(null); // reset
-                }
-            }
-        });
-
+        
         // filtering the items shown according to the checkbox
         CheckBox showCompleteBox = new CheckBox("Show Complete");
         showCompleteBox.setSelected(true);
