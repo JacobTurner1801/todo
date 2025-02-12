@@ -39,6 +39,5 @@
 
 
 .completed-task {
-    -fx-strikehthrough: true;
     -fx-text-fill: lightblue;
 }

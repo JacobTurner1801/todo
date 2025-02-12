@@ -62,7 +62,6 @@ public class TodoApplication extends Application {
                         System.out.println("Loading...");
                     } else {
                         System.out.println("There may be a problem as both empty is true and item is null");
-                        setGraphic(null);
                     }
                 } else if (!empty && item != null) {
                     CheckBox checkbox = new CheckBox();
