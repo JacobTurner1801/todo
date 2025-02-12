@@ -12,7 +12,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 
 public class TodoItemCellFactory extends ListCell<TodoItem> {
     private TodoItemDAO dao;
