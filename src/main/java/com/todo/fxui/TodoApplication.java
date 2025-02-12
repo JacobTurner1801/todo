@@ -21,6 +21,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -42,11 +44,9 @@ public class TodoApplication extends Application {
         todoItemService = new TodoItemService(dao);
 
         todoList = new ListView<>();
-        
         // dao.addTodoItem("Finish Interface");
         // dao.addTodoItem("Complete Other things");
         todoList.setItems(todoItems);
-        todoList.setCellFactory(p -> new TodoItemCellFactory(dao, todoItemService, todoItems));
         // System.out.println(todoItems);
         
         // filtering the items shown according to the checkbox
@@ -75,11 +75,21 @@ public class TodoApplication extends Application {
         HBox filter = new HBox(showCompleteBox, showCompleteLabel);
         filter.setPadding(new Insets(5));
         HBox.setHgrow(showCompleteLabel, Priority.ALWAYS);
+
+        // No Items
+        Label noItemsLabel = new Label("No Items Left");
+        noItemsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: white;");
+        noItemsLabel.managedProperty().bind(noItemsLabel.visibleProperty());
+
+        todoList.setCellFactory(param -> new TodoItemCellFactory(dao, todoItemService, todoItems, noItemsLabel));
+        
         // Main UI
-        VBox root = new VBox(filter, todoList);
+        StackPane listContainer = new StackPane(todoList, noItemsLabel);
+        VBox mainLayout = new VBox(filter, listContainer);
+        // VBox root = new VBox(filter, todoList);
         VBox.setVgrow(todoList, Priority.ALWAYS);
         // Scene
-        Scene scene = new Scene(root, 1920, 1080);
+        Scene scene = new Scene(mainLayout, 1920, 1080);
         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
         primaryStage.setTitle("Todo");
         primaryStage.setScene(scene); // Set Scene to Stage

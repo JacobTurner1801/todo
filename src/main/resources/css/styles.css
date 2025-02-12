@@ -1,12 +1,16 @@
 .root {
-    -fx-background-color: #312e2d /* Light gray background */
+    -fx-background-color: #312e2d;
 }
 
-.list-view { /* Example: Style the list view */
+.v-box {
+    -fx-background-color: #312e2d;
+}
+
+.list-view {
     -fx-text-fill: white;
 }
 
-.list-cell { /* Style the list cells */
+.list-cell {
     -fx-background-color: #312e2d;
 }
 
@@ -25,7 +29,7 @@
     -fx-background-color: #312e2d; /* Set the box color */
     -fx-border-color: green; /* Set the border color */
     -fx-border-width: 2; /* Set the border width */
-    -fx-border-radius: 3; /* Set the border radius (rounded corners) */
+    -fx-border-radius: 3;
 }
 
 .check-box .mark {

@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 public class TodoItemCellFactory extends ListCell<TodoItem> {
     private TodoItemDAO dao;
@@ -20,10 +21,13 @@ public class TodoItemCellFactory extends ListCell<TodoItem> {
 
     private ObservableList<TodoItem> todoItems;
 
-    public TodoItemCellFactory(TodoItemDAO dao, TodoItemService todoItemService, ObservableList<TodoItem> todoItems) {
+    private Label noItems;
+
+    public TodoItemCellFactory(TodoItemDAO dao, TodoItemService todoItemService, ObservableList<TodoItem> todoItems, Label noItemsLabel) {
         this.dao = dao;
         this.todoItemService = todoItemService;
         this.todoItems = todoItems;
+        this.noItems = noItemsLabel;
     }
 
     @Override
@@ -32,12 +36,13 @@ public class TodoItemCellFactory extends ListCell<TodoItem> {
         if (empty || item == null) {
             setText(null);
             setGraphic(null);
-
             if (!todoItems.isEmpty() && item == null) { // Data is loaded, but item is null (Virtualization)
                 // TODO: add in a loading thing here
                 System.out.println("Loading...");
             } else {
-                System.out.println("There may be a problem as both empty is true and item is null");
+                if (this.getListView() != null) {
+                    noItems.setVisible(getListView().getItems().isEmpty());
+                }
             }
         } else if (!empty && item != null) {
             CheckBox checkbox = new CheckBox();
@@ -86,6 +91,7 @@ public class TodoItemCellFactory extends ListCell<TodoItem> {
             HBox.setHgrow(cellContent, Priority.ALWAYS);
 
             setGraphic(cellContent);
+            noItems.setVisible(false);
             setText(null); // reset
         }
     }
