@@ -45,3 +45,19 @@
 .completed-task {
     -fx-text-fill: lightblue;
 }
+
+.textfield {
+    -fx-background-color: #312e2d;
+    -fx-text-fill: white;
+    -fx-padding: 8 15;
+    -fx-border-radius: 5;
+}
+
+.button {
+    -fx-background-color: #312e2d;
+    -fx-text-fill: white;
+}
+
+.button:hover {
+    -fx-border-color: lightblue;
+}
