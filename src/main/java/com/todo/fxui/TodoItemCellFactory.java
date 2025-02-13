@@ -40,7 +40,7 @@ public class TodoItemCellFactory extends ListCell<TodoItem> {
             setText(null);
             setGraphic(null);
             if (!todoItems.isEmpty() && item == null) { // Data is loaded, but item is null (Virtualization)
-                // TODO: add in a loading thing here
+                // add in a loading thing here maybe
                 System.out.println("Loading...");
             } else {
                 if (this.getListView() != null) {
@@ -56,38 +56,16 @@ public class TodoItemCellFactory extends ListCell<TodoItem> {
             taskL.textProperty().bind(item.getTaskProperty());
             // bind bidirectional should update the database as well
             checkbox.selectedProperty().bindBidirectional(item.getCompletedProperty());
+            checkbox.selectedProperty().addListener((obs, old, newVal) -> handleUpdateItem(item, newVal));
 
+            Button removeButton = new Button("remove");
+            removeButton.setOnAction(event -> handleRemove(item));
+            
             taskL.getStyleClass().removeAll("completed-task");
-            System.out.println(item.isCompleted());
-            System.out.println(dao.getTodoItemById(item.getId()));
+            // System.out.println(item); // here for debugging
             if (item.isCompleted()) {
                 taskL.getStyleClass().add("completed-task");
             }
-
-            checkbox.selectedProperty().addListener((obs, old, newVal) -> {
-                item.complete(newVal);
-                Task<Void> updateTask = new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        dao.updateItemCompleted(item.getId(), newVal);
-                        return null;
-                    }
-
-                    @Override
-                    protected void failed() {
-                        Throwable e = getException();
-                        System.out.println(e.getMessage());
-                        e.printStackTrace();
-                    }
-                };
-                new Thread(updateTask).start();
-                this.todoItemService.restart();
-                this.getListView().refresh(); // force a refresh of the list view
-            });
-
-            Button removeButton = new Button("remove");
-
-            removeButton.setOnAction(event -> handleRemove(item));
 
             HBox cellContent = new HBox(checkbox, taskL, removeButton);
             cellContent.setAlignment(Pos.CENTER);
@@ -101,6 +79,27 @@ public class TodoItemCellFactory extends ListCell<TodoItem> {
             noItems.setVisible(false);
             setText(null); // reset
         }
+    }
+
+    private void handleUpdateItem(TodoItem item, boolean val) {
+        item.complete(val);
+        Task<Void> updateTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                dao.updateItemCompleted(item.getId(), val);
+                return null;
+            }
+
+            @Override
+            protected void failed() {
+                Throwable e = getException();
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+        };
+        new Thread(updateTask).start();
+        this.todoItemService.restart();
+        this.getListView().refresh(); // force a refresh of the list view
     }
 
     /**

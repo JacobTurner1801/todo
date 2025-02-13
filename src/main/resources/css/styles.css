@@ -41,7 +41,6 @@
     -fx-cursor: hand; /* Change cursor on hover */
 }
 
-
 .completed-task {
     -fx-text-fill: lightblue;
 }

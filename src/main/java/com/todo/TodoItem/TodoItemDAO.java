@@ -82,7 +82,6 @@ public class TodoItemDAO implements AutoCloseable {
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    System.out.println("here");
                     int itemId = resultSet.getInt("id");
                     String task = resultSet.getString("task");
                     boolean completed = resultSet.getInt("completed") == 1;
@@ -137,8 +136,7 @@ public class TodoItemDAO implements AutoCloseable {
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setInt(1, completed ? 1 : 0);
             ps.setInt(2, id);
-            int affect = ps.executeUpdate();
-            System.out.println("Rows affected: " + affect);
+            int affect = ps.executeUpdate(); // store rows affected for debugging
         } catch (SQLException se) {
             new TodoItemDAOSQLError("UPDATING COMPLETED " + String.valueOf(id) + " ", se);
         }

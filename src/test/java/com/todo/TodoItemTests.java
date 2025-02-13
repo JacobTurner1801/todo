@@ -77,8 +77,6 @@ public class TodoItemTests {
     public void testGettingOneItem() {
         dao.addTodoItem("Test Task");
         Optional<TodoItem> ti = dao.getTodoItemById(1);
-        ti.ifPresent(todoItem -> System.out.println("Found task: " + todoItem));
-        System.out.println(ti.get());
         assertTrue(ti.get().getTask().equals("Test Task"));
     }
 
