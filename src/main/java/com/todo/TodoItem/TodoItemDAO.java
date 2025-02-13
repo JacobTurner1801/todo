@@ -61,14 +61,20 @@ public class TodoItemDAO implements AutoCloseable {
         }
     }
     
-    public void addTodoItem(String task) {
+    public TodoItem addTodoItem(String task) {
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO todos (task) VALUES (?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO todos (task, completed) VALUES (?, ?)");
             ps.setString(1, task);
+            ps.setInt(2, 0);
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                int id = keys.getInt(1); // get the id which has just been generated
+                return new TodoItem(id, task, false);
+            }
         } catch (SQLException se) {
             new TodoItemDAOSQLError("ADDING ITEM", se);
         }
+        return null;
     }
 
     public Optional<TodoItem> getTodoItemById(int id) {

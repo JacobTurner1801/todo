@@ -6,13 +6,18 @@ import com.todo.TodoItem.TodoItem;
 import com.todo.TodoItem.TodoItemDAO;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -28,6 +33,10 @@ public class TodoApplication extends Application {
     private ListView<TodoItem> todoList;
 
     private ObservableList<TodoItem> todoItems = FXCollections.observableArrayList(); // can notify of updates to content
+
+    private TextField addItemTextField;
+
+    private Button addItemButton;
 
     @Override
     public void start(Stage primaryStage) {
@@ -67,9 +76,21 @@ public class TodoApplication extends Application {
         showCompleteLabel.setPrefWidth(100);
         showCompleteLabel.setWrapText(true);
 
-        // showComplete checkbox layout
-        HBox filter = new HBox(showCompleteBox, showCompleteLabel);
-        filter.setPadding(new Insets(5));
+        // Add item
+        addItemTextField = new TextField();
+        addItemButton = new Button("Add Item");
+        HBox addBox = new HBox(addItemTextField, addItemButton);
+        addBox.setSpacing(10);
+        addBox.setAlignment(Pos.CENTER_LEFT);
+        addBox.setPadding(new Insets(10));
+
+        AddItemHandler addItemHandler = new AddItemHandler(dao, todoItems, todoList,addItemTextField);
+
+        addItemButton.setOnAction(event -> addItemHandler.handleItem());
+        
+        // top settings bar and add item layout
+        HBox topSettings = new HBox(showCompleteBox, showCompleteLabel, addBox);
+        topSettings.setPadding(new Insets(5));
         HBox.setHgrow(showCompleteLabel, Priority.ALWAYS);
 
         // No Items Label, and bind the visibility property
@@ -82,7 +103,7 @@ public class TodoApplication extends Application {
         
         // Main UI
         StackPane listContainer = new StackPane(todoList, noItemsLabel);
-        VBox mainLayout = new VBox(filter, listContainer);
+        VBox mainLayout = new VBox(topSettings, listContainer);
         VBox.setVgrow(todoList, Priority.ALWAYS);
 
         // Scene
