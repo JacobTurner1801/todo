@@ -1,15 +1,17 @@
 package com.todo.fxui;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import com.todo.TodoItem.TodoItem;
 import com.todo.TodoItem.TodoItemDAO;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -40,8 +42,16 @@ public class TodoApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        
-        dao = new TodoItemDAO("todos.db");
+
+        File db_path = new File("C:\\todo");
+        try {
+            Files.createDirectories(Path.of(db_path.toURI()));
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        dao = new TodoItemDAO("C:\\todo\\todos.db");
 
         todoItemService = new TodoItemService(dao);
 
@@ -130,6 +140,8 @@ public class TodoApplication extends Application {
 
     public static void main(String[] args) {
         // to run javafx: mvn clean ; mvn javafx:run
+        // create exe: jpackage --name "todo" --input "target" --main-jar "todo-1.0-SNAPSHOT.jar" --main-class "com.todo.fxui.TodoApplication" --dest "dist" --type "exe" 
+        // run from todo/todo.
         launch(args);
     }
 }
