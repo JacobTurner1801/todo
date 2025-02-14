@@ -140,7 +140,7 @@ public class TodoApplication extends Application {
 
     public static void main(String[] args) {
         // to run javafx: mvn clean ; mvn javafx:run
-        // create exe: jpackage --name "todo" --input "target" --main-jar "todo-1.0-SNAPSHOT.jar" --main-class "com.todo.fxui.TodoApplication" --dest "dist" --type "exe" 
+        // create exe: jpackage --name "todo" --input "target" --main-jar "todo-0.02-jar-with-dependencies.jar" --main-class "com.todo.fxui.TodoApplication" --dest "dist" --type "exe" 
         // run from todo/todo.
         launch(args);
     }
